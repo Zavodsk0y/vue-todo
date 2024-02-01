@@ -7,12 +7,12 @@ Vue.component('first-column', {
         <ul>
             <li v-for="(card, index) in cards">
             <p>{{ card.name }}</p>
-            <todo-list :tasks="card.tasks" @add-task="addTask(index, $event)"></todo-list>
+            <todo-list :tasks="card.tasks" @add-task="addTask(index, $event)" @complete-task="completeTask(index, $event)"></todo-list>
             </li>
     </ul>
     </div>`,
     methods: {
-        addCard(name) {
+        addCard() {
             if (this.quantity < 3) {
                 this.cards.push({name: this.name, tasks: []})
                 this.name = ''
@@ -22,10 +22,12 @@ Vue.component('first-column', {
         addTask(cardIndex, newTask) {
             this.cards[cardIndex].tasks.push(newTask)
             console.log(cardIndex)
+            console.log(this.cards)
             // console.log(this.cards[cardIndex].tasks[1].name)
         },
-        completeTask(cardIndex) {
-
+        completeTask(cardIndex, taskIndex) {
+            console.log(this.cards[cardIndex].tasks[taskIndex])
+            this.cards[cardIndex].tasks[taskIndex].completed = !this.cards[cardIndex].tasks[taskIndex].completed
         }
     },
     data() {
@@ -112,7 +114,7 @@ Vue.component('todo-list', {
     template: `
     <ul>
         <li v-for="(task, index) in tasks" :key="index">
-            <p>{{task.name}}</p>
+            <p :class="{'completed' : task.completed }" @click="completeTask(index)">{{task.name}}</p>
         </li>
         <input v-model="newTask" type="text" placeholder="Новая задача">
         <button @click="addTask">Добавить задачу</button>
@@ -128,8 +130,8 @@ Vue.component('todo-list', {
             this.$emit('add-task', {name: this.newTask, completed: false})
             this.newTask = ''
         },
-        completeTask() {
-
+        completeTask(index) {
+            this.$emit('complete-task', index)
         }
     }
 })
