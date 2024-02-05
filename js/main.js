@@ -14,9 +14,11 @@ Vue.component('first-column', {
     methods: {
         addCard() {
             if (this.quantity < 3) {
-                this.cards.push({name: this.name, tasks: []})
-                this.name = ''
-                this.quantity += 1
+                const newCard = { name: this.name, tasks: [] };
+                this.cards.push(newCard);
+                this.$parent.$children[1].firstColumnCards.push(newCard); // Добавляем в массив firstColumnCards второй колонки
+                this.name = '';
+                this.quantity += 1;
             }
         },
         addTask(cardIndex, newTask) {
@@ -26,8 +28,19 @@ Vue.component('first-column', {
             // console.log(this.cards[cardIndex].tasks[1].name)
         },
         completeTask(cardIndex, taskIndex) {
-            console.log(this.cards[cardIndex].tasks[taskIndex])
-            this.cards[cardIndex].tasks[taskIndex].completed = !this.cards[cardIndex].tasks[taskIndex].completed
+            this.cards[cardIndex].tasks[taskIndex].completed = !this.cards[cardIndex].tasks[taskIndex].completed;
+
+            // Проверяем, выполнено ли 50% задач
+            if (this.isCardHalfCompleted(cardIndex)) {
+                // Выполняем передвижение карточки во вторую колонку
+                app.$children[1].moveCardToInProgress(cardIndex);
+                this.cards.splice(cardIndex, 1); // Удаляем карточку из текущей колонки
+            }
+        },
+        isCardHalfCompleted(cardIndex) {
+            const tasks = this.cards[cardIndex].tasks;
+            const completedTasks = tasks.filter(task => task.completed);
+            return completedTasks.length / tasks.length >= 0.5;
         }
     },
     data() {
@@ -64,12 +77,20 @@ Vue.component('second-column', {
         addTask(cardIndex, newTask) {
             this.cards[cardIndex].tasks.push(newTask)
         },
+        moveCardToInProgress(cardIndex) {
+            if (this.quantity < 3) {
+                this.cards.push(this.firstColumnCards[cardIndex]);
+                this.firstColumnCards.splice(cardIndex, 1);
+                this.quantity++;
+            }
+        }
     },
     data() {
         return {
             name: '',
             cards: [],
-            quantity: 0
+            quantity: 0,
+            firstColumnCards: [],
         }
     }
 })
