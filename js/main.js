@@ -30,11 +30,10 @@ Vue.component('first-column', {
         completeTask(cardIndex, taskIndex) {
             this.cards[cardIndex].tasks[taskIndex].completed = !this.cards[cardIndex].tasks[taskIndex].completed;
 
-            // Проверяем, выполнено ли 50% задач
             if (this.isCardHalfCompleted(cardIndex)) {
-                // Выполняем передвижение карточки во вторую колонку
                 app.$children[1].moveCardToInProgress(cardIndex);
-                this.cards.splice(cardIndex, 1); // Удаляем карточку из текущей колонки
+                this.cards.splice(cardIndex, 1);
+                this.quantity--
             }
         },
         isCardHalfCompleted(cardIndex) {
@@ -56,33 +55,36 @@ Vue.component('second-column', {
     template: `
     <div class="column" id="important-column">
         <h2 class="t-a-c">В работе</h2>
-        <input v-model="name" type="text" placeholder="Название карточки">
-        <button v-on:click="addCard(name)">+</button>
         <ul>
             <li v-for="(card, index) in cards">
             <p>{{ card.name }}</p>
-            <todo-list :tasks="card.tasks" @add-task="addTask(index, $event)"></todo-list>
+            <todo-list :tasks="card.tasks" @add-task="addTask(index, $event)" @complete-task="completeTask(index, $event)"></todo-list>
             </li>
     </ul>
     </div>`,
     methods: {
-        addCard(name) {
-            if (this.quantity < 3) {
-                this.cards.push({name: this.name, tasks: []})
-                this.name = ''
-                this.quantity += 1
-            }
-            console.log(this.quantity)
-        },
-        addTask(cardIndex, newTask) {
-            this.cards[cardIndex].tasks.push(newTask)
-        },
         moveCardToInProgress(cardIndex) {
-            if (this.quantity < 3) {
+            if (this.quantity < 5) {
                 this.cards.push(this.firstColumnCards[cardIndex]);
+                console.log(this.cards)
                 this.firstColumnCards.splice(cardIndex, 1);
+                console.log(this.quantity)
                 this.quantity++;
             }
+        },
+        completeTask(cardIndex, taskIndex) {
+            this.cards[cardIndex].tasks[taskIndex].completed = !this.cards[cardIndex].tasks[taskIndex].completed;
+
+            if (this.isCardCompleted(cardIndex)) {
+                app.$children[2].moveCardToDone(cardIndex);
+                this.cards.splice(cardIndex, 1);
+                this.quantity--
+            }
+        },
+        isCardCompleted(cardIndex) {
+            const tasks = this.cards[cardIndex].tasks;
+            const completedTasks = tasks.filter(task => task.completed);
+            return completedTasks.length / tasks.length >= 1;
         }
     },
     data() {
@@ -99,33 +101,28 @@ Vue.component('third-column', {
     template: `
     <div class="column" id="important-column">
         <h2 class="t-a-c">Сдан</h2>
-        <input v-model="name" type="text" placeholder="Название карточки">
-        <button v-on:click="addCard(name)">+</button>
         <ul>
             <li v-for="(card, index) in cards">
             <p>{{ card.name }}</p>
-            <todo-list :tasks="card.tasks" @add-task="addTask(index, $event)"></todo-list>
+            <todo-list :tasks="card.tasks"></todo-list>
             </li>
     </ul>
     </div>`,
     methods: {
-        addCard(name) {
-            if (this.quantity < 3) {
-                this.cards.push({name: this.name, tasks: []})
-                this.name = ''
-                this.quantity += 1
+        moveCardToDone(cardIndex) {
+            if (this.quantity < 5) {
+                this.cards.push(this.secondColumnCards[cardIndex]);
+                this.secondColumnCards.splice(cardIndex, 1);
+                this.quantity++;
             }
-            console.log(this.quantity)
-        },
-        addTask(cardIndex, newTask) {
-            this.cards[cardIndex].tasks.push(newTask)
         },
     },
     data() {
         return {
             name: '',
             cards: [],
-            quantity: 0
+            quantity: 0,
+            secondColumnCards: [],
         }
     }
 })
