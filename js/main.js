@@ -55,7 +55,7 @@ Vue.component('first-column', {
             }
         },
         saveToLocalStorage() {
-            let jsonData = JSON.stringify(this.cards, this.firstColumnCards)
+            let jsonData = JSON.stringify(this.cards)
             localStorage.setItem('cards', jsonData)
         },
         removeFromLocalStorage() {
