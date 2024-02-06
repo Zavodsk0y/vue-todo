@@ -14,23 +14,33 @@ Vue.component('first-column', {
     methods: {
         addCard() {
             if (this.quantity < 3) {
-                this.cards.push({name: this.name, tasks: []})
-                this.name = ''
-                this.quantity += 1
+                const newCard = { name: this.name, tasks: [] };
+                this.cards.push(newCard);
+                this.$parent.$children[1].firstColumnCards.push(newCard); // Добавляем в массив firstColumnCards второй колонки
+                this.name = '';
+                this.quantity += 1;
             }
         },
         addTask(cardIndex, newTask) {
-            let i = 0
             this.cards[cardIndex].tasks.push(newTask)
-            console.log(Object.values(this.cards[cardIndex].tasks).length)
-            console.log(Object.values(this.cards[cardIndex].tasks.contains()).length)
-            let tasksCount = Object.values(this.cards[cardIndex].tasks).length
-
+            console.log(cardIndex)
+            console.log(this.cards)
             // console.log(this.cards[cardIndex].tasks[1].name)
         },
         completeTask(cardIndex, taskIndex) {
-            console.log(this.cards[cardIndex].tasks[taskIndex])
-            this.cards[cardIndex].tasks[taskIndex].completed = !this.cards[cardIndex].tasks[taskIndex].completed
+            this.cards[cardIndex].tasks[taskIndex].completed = !this.cards[cardIndex].tasks[taskIndex].completed;
+
+            // Проверяем, выполнено ли 50% задач
+            if (this.isCardHalfCompleted(cardIndex)) {
+                // Выполняем передвижение карточки во вторую колонку
+                app.$children[1].moveCardToInProgress(cardIndex);
+                this.cards.splice(cardIndex, 1); // Удаляем карточку из текущей колонки
+            }
+        },
+        isCardHalfCompleted(cardIndex) {
+            const tasks = this.cards[cardIndex].tasks;
+            const completedTasks = tasks.filter(task => task.completed);
+            return completedTasks.length / tasks.length >= 0.5;
         }
     },
     data() {
@@ -39,34 +49,48 @@ Vue.component('first-column', {
             cards: [],
             quantity: 0
         }
-    },
-    computed: {
-        percentage(cardIndex, taskIndex) {
-            return (this.cards[cardIndex].tasks.length / this.cards[cardIndex].tasks.completed.length) * 100
-        }
     }
 })
 
 Vue.component('second-column', {
-    props: ['cards'],
     template: `
     <div class="column" id="important-column">
         <h2 class="t-a-c">В работе</h2>
+        <input v-model="name" type="text" placeholder="Название карточки">
+        <button v-on:click="addCard(name)">+</button>
         <ul>
             <li v-for="(card, index) in cards">
             <p>{{ card.name }}</p>
-            <todo-list :tasks="card.tasks" @add-task="addTask(index, $event)" @complete-task="completeTask(index, $event)"></todo-list>
+            <todo-list :tasks="card.tasks" @add-task="addTask(index, $event)"></todo-list>
             </li>
     </ul>
-        
     </div>`,
     methods: {
-
+        addCard(name) {
+            if (this.quantity < 3) {
+                this.cards.push({name: this.name, tasks: []})
+                this.name = ''
+                this.quantity += 1
+            }
+            console.log(this.quantity)
+        },
+        addTask(cardIndex, newTask) {
+            this.cards[cardIndex].tasks.push(newTask)
+        },
+        moveCardToInProgress(cardIndex) {
+            if (this.quantity < 3) {
+                this.cards.push(this.firstColumnCards[cardIndex]);
+                this.firstColumnCards.splice(cardIndex, 1);
+                this.quantity++;
+            }
+        }
     },
     data() {
         return {
             name: '',
-            quantity: 0
+            cards: [],
+            quantity: 0,
+            firstColumnCards: [],
         }
     }
 })
