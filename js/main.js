@@ -17,9 +17,10 @@ Vue.component('first-column', {
                 const newCard = { name: this.name, tasks: [] };
                 this.cards.push(newCard);
                 this.$parent.$children[1].firstColumnCards.push(newCard);
+                this.firstColumnCards.push(newCard)
+                this.saveToLocalStorage()
                 this.name = '';
                 this.quantity += 1;
-                this.saveToLocalStorage()
             }
         },
         addTask(cardIndex, newTask) {
@@ -42,14 +43,20 @@ Vue.component('first-column', {
             return completedTasks.length / tasks.length >= 0.5;
         },
         loadFromLocalStorage() {
-            let savedData = localStorage.getItem('todo-container')
+            let savedData = localStorage.getItem('cards')
             if (savedData) {
-                this.cards = JSON.parse(savedData)
+                try {
+                    this.cards = JSON.parse(savedData)
+                    console.log('Success')
+                    console.log(this.cards)
+                } catch (error) {
+                    console.error('Error parsing saved data:', error)
+                }
             }
         },
         saveToLocalStorage() {
-            let jsonData = JSON.stringify(this.cards)
-            localStorage.setItem('todo-container', jsonData)
+            let jsonData = JSON.stringify(this.cards, this.firstColumnCards)
+            localStorage.setItem('cards', jsonData)
         },
         removeFromLocalStorage() {
             localStorage.clear()
@@ -84,8 +91,10 @@ Vue.component('second-column', {
             if (this.quantity < 5) {
                 this.cards.push(this.firstColumnCards[cardIndex]);
                 console.log(this.firstColumnCards[cardIndex])
-                this.firstColumnCards.splice(cardIndex, 1);
+                console.log(this.firstColumnCards)
+                console.log(this.cards)
                 this.quantity++;
+                this.saveToLocalStorage()
             }
         },
         completeTask(cardIndex, taskIndex) {
@@ -102,11 +111,15 @@ Vue.component('second-column', {
         moveCardToDone(cardIndex) {
             this.$parent.$children[2].cards.push(this.cards[cardIndex])
             this.cards.splice(cardIndex, 1)
-        }
+            this.saveToLocalStorage()
+        },
+        saveToLocalStorage() {
+            let jsonData = JSON.stringify(this.cards)
+            localStorage.setItem('cards', jsonData)
+        },
     },
     data() {
         return {
-            name: '',
             cards: [],
             quantity: 0,
             firstColumnCards: [],
