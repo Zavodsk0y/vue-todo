@@ -20,9 +20,12 @@ Vue.component('first-column', {
             }
         },
         addTask(cardIndex, newTask) {
+            let i = 0
             this.cards[cardIndex].tasks.push(newTask)
-            console.log(cardIndex)
-            console.log(this.cards)
+            console.log(Object.values(this.cards[cardIndex].tasks).length)
+            console.log(Object.values(this.cards[cardIndex].tasks.contains()).length)
+            let tasksCount = Object.values(this.cards[cardIndex].tasks).length
+
             // console.log(this.cards[cardIndex].tasks[1].name)
         },
         completeTask(cardIndex, taskIndex) {
@@ -36,39 +39,33 @@ Vue.component('first-column', {
             cards: [],
             quantity: 0
         }
+    },
+    computed: {
+        percentage(cardIndex, taskIndex) {
+            return (this.cards[cardIndex].tasks.length / this.cards[cardIndex].tasks.completed.length) * 100
+        }
     }
 })
 
 Vue.component('second-column', {
+    props: ['cards'],
     template: `
     <div class="column" id="important-column">
         <h2 class="t-a-c">В работе</h2>
-        <input v-model="name" type="text" placeholder="Название карточки">
-        <button v-on:click="addCard(name)">+</button>
         <ul>
             <li v-for="(card, index) in cards">
             <p>{{ card.name }}</p>
-            <todo-list :tasks="card.tasks" @add-task="addTask(index, $event)"></todo-list>
+            <todo-list :tasks="card.tasks" @add-task="addTask(index, $event)" @complete-task="completeTask(index, $event)"></todo-list>
             </li>
     </ul>
+        
     </div>`,
     methods: {
-        addCard(name) {
-            if (this.quantity < 3) {
-                this.cards.push({name: this.name, tasks: []})
-                this.name = ''
-                this.quantity += 1
-            }
-            console.log(this.quantity)
-        },
-        addTask(cardIndex, newTask) {
-            this.cards[cardIndex].tasks.push(newTask)
-        },
+
     },
     data() {
         return {
             name: '',
-            cards: [],
             quantity: 0
         }
     }
