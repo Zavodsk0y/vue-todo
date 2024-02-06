@@ -16,16 +16,13 @@ Vue.component('first-column', {
             if (this.quantity < 3) {
                 const newCard = { name: this.name, tasks: [] };
                 this.cards.push(newCard);
-                this.$parent.$children[1].firstColumnCards.push(newCard); // Добавляем в массив firstColumnCards второй колонки
+                this.$parent.$children[1].firstColumnCards.push(newCard);
                 this.name = '';
                 this.quantity += 1;
             }
         },
         addTask(cardIndex, newTask) {
             this.cards[cardIndex].tasks.push(newTask)
-            console.log(cardIndex)
-            console.log(this.cards)
-            // console.log(this.cards[cardIndex].tasks[1].name)
         },
         completeTask(cardIndex, taskIndex) {
             this.cards[cardIndex].tasks[taskIndex].completed = !this.cards[cardIndex].tasks[taskIndex].completed;
@@ -66,26 +63,14 @@ Vue.component('second-column', {
         moveCardToInProgress(cardIndex) {
             if (this.quantity < 5) {
                 this.cards.push(this.firstColumnCards[cardIndex]);
-                console.log(this.cards)
+                console.log(this.firstColumnCards[cardIndex])
                 this.firstColumnCards.splice(cardIndex, 1);
-                console.log(this.quantity)
                 this.quantity++;
             }
         },
         completeTask(cardIndex, taskIndex) {
             this.cards[cardIndex].tasks[taskIndex].completed = !this.cards[cardIndex].tasks[taskIndex].completed;
-
-            if (this.isCardCompleted(cardIndex)) {
-                app.$children[2].moveCardToDone(cardIndex);
-                this.cards.splice(cardIndex, 1);
-                this.quantity--
-            }
         },
-        isCardCompleted(cardIndex) {
-            const tasks = this.cards[cardIndex].tasks;
-            const completedTasks = tasks.filter(task => task.completed);
-            return completedTasks.length / tasks.length >= 1;
-        }
     },
     data() {
         return {
@@ -109,20 +94,13 @@ Vue.component('third-column', {
     </ul>
     </div>`,
     methods: {
-        moveCardToDone(cardIndex) {
-            if (this.quantity < 5) {
-                this.cards.push(this.secondColumnCards[cardIndex]);
-                this.secondColumnCards.splice(cardIndex, 1);
-                this.quantity++;
-            }
-        },
+
     },
     data() {
         return {
             name: '',
             cards: [],
             quantity: 0,
-            secondColumnCards: [],
         }
     }
 })
