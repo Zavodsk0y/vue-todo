@@ -19,10 +19,12 @@ Vue.component('first-column', {
                 this.$parent.$children[1].firstColumnCards.push(newCard);
                 this.name = '';
                 this.quantity += 1;
+                this.saveToLocalStorage()
             }
         },
         addTask(cardIndex, newTask) {
             this.cards[cardIndex].tasks.push(newTask)
+            this.saveToLocalStorage()
         },
         completeTask(cardIndex, taskIndex) {
             this.cards[cardIndex].tasks[taskIndex].completed = !this.cards[cardIndex].tasks[taskIndex].completed;
@@ -32,12 +34,30 @@ Vue.component('first-column', {
                 this.cards.splice(cardIndex, 1);
                 this.quantity--
             }
+            this.saveToLocalStorage()
         },
         isCardHalfCompleted(cardIndex) {
             const tasks = this.cards[cardIndex].tasks;
             const completedTasks = tasks.filter(task => task.completed);
             return completedTasks.length / tasks.length >= 0.5;
+        },
+        loadFromLocalStorage() {
+            let savedData = localStorage.getItem('todo-container')
+            if (savedData) {
+                this.cards = JSON.parse(savedData)
+            }
+        },
+        saveToLocalStorage() {
+            let jsonData = JSON.stringify(this.cards)
+            localStorage.setItem('todo-container', jsonData)
+        },
+        removeFromLocalStorage() {
+            localStorage.clear()
+            location.reload()
         }
+    },
+    mounted() {
+        this.loadFromLocalStorage()
     },
     data() {
         return {
