@@ -70,7 +70,19 @@ Vue.component('second-column', {
         },
         completeTask(cardIndex, taskIndex) {
             this.cards[cardIndex].tasks[taskIndex].completed = !this.cards[cardIndex].tasks[taskIndex].completed;
+
+            if (this.isCardCompleted(cardIndex)) {
+                this.moveCardToDone(cardIndex)
+            }
         },
+        isCardCompleted(cardIndex) {
+            const tasks = this.cards[cardIndex].tasks
+            return tasks.every(task => task.completed)
+        },
+        moveCardToDone(cardIndex) {
+            this.$parent.$children[2].cards.push(this.cards[cardIndex])
+            this.cards.splice(cardIndex, 1)
+        }
     },
     data() {
         return {
